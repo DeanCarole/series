@@ -3,9 +3,29 @@
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Series !{% endblock %}</title>
-
+        <link rel="stylesheet" href="{{ asset('css/normalize.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap" rel="stylesheet">
+        <link rel="icon" href="{{ asset('img/icon.png') }}">
     </head>
     <body>
-        {% block body %}{% endblock %}
+    <div class="container">
+    <header>
+        <h1>
+            <a href="{{ path('main_home') }}">
+                <img src="{{ asset('img/logo.svg') }}" alt="Series !">
+            </a>
+        </h1>
+        {%  include 'menu/nav.html.twig' %}
+    </header>
+
+        {% block body %} Body par défaut{% endblock %}
+
+<footer>
+   {%  include 'menu/nav.html.twig' %}
+</footer>
+    </div>
     </body>
 </html>
