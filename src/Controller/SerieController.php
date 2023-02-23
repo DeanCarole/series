@@ -19,9 +19,16 @@ class SerieController extends AbstractController
         //on récupère toutes les séries en passant par le repository
        // $series= $serieRepository->findAll();
 
-        //récupération des 50 séries les mieux notées
-    $series = $serieRepository->findBy(["status" => "ended"], ["popularity"=> 'DESC'], 50);
+        //récupération de findby avec un tableau de clause WHERE, ORDER BY
+        //$series = $serieRepository->findBy(["status"=> "ended"], ["popularity"=> 'DESC'), 10;
 
+        //récupération des 50 séries les mieux notées
+        //$series = $serieRepository->findBy([], ["vote"=> "DESC"], 50);
+
+        //méthode magique qui est créée dynamiquement en fonction des attributs de l'entité associée
+        //$series = $serieRepository->findByStatus ("ended");
+
+        $series = $serieRepository->findBestSeries();
 
         return $this->render('serie/list.html.twig', [
             //on envoie les données à la vue
@@ -77,7 +84,11 @@ class SerieController extends AbstractController
     public function show(int $id, SerieRepository $serieRepository): Response
     {
         $serie = $serieRepository->find($id);
-        dump($serie);
+
+        if (!$serie){
+            //lance une erreur 404 si la série n'existe pas
+            throw $this->createNotFoundException("Oops ! Serie not found !");
+        }
         //TODO récupération des infos de la série
         return $this->render('serie/show.html.twig', ['serie'=> $serie]);
     }
