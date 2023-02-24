@@ -44,7 +44,7 @@ class SerieController extends AbstractController
     {
         $serie = new Serie();
 
-        $serie->setName("Sliders");
+       // $serie->setName("Sliders");
 
         //création d'une instance de form lié à une instance de série
         $serieForm = $this->createForm(SerieType::class, $serie);
@@ -53,8 +53,7 @@ class SerieController extends AbstractController
         $serieForm->handleRequest($request);
 
 
-        if($serieForm->isSubmitted()){
-
+        if($serieForm->isSubmitted() && $serieForm->isValid()){
             //sauvegarde en BDD
             $serieRepository->save($serie, true);
 
@@ -65,7 +64,7 @@ class SerieController extends AbstractController
 
         }
 
-        dump($serie);
+        //dump($serie);
 
         return $this->render('serie/add.html.twig', [
             'serieForm'=>$serieForm->createView()
