@@ -3,11 +3,14 @@
 namespace App\Controller;
 
 use App\Entity\Serie;
+use App\Form\SerieType;
 use App\Repository\SerieRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+
 //attribut de la class qui permet de mutualiser des informations
 #[Route('/serie', name: 'serie_')]
 class SerieController extends AbstractController
@@ -37,47 +40,36 @@ class SerieController extends AbstractController
     }
 
     #[Route('/add', name: 'add')]
-    public function add(SerieRepository $serieRepository, EntityManagerInterface $entityManager): Response
+    public function add(SerieRepository $serieRepository, Request $request ): Response
     {
         $serie = new Serie();
-        $serie
-            //settage des infos de la série
-            ->setName("Le magicien")
-            ->setBackdrop("backdrop.png")
-            ->setDateCreated(new \DateTime())
-            ->setGenres("Comedy")
-            ->setFirstAirDate(new \DateTime('2022-02-02'))
-            ->setLastAirDate(new \DateTime("-6 month"))
-            ->setPopularity(850.52)
-            ->setPoster("poster.png")
-            ->setTmdbId(123456)
-            ->setVote(8.5)
-            ->setStatus("Ended");
+
+        $serie->setName("Sliders");
+
+        //création d'une instance de form lié à une instance de série
+        $serieForm = $this->createForm(SerieType::class, $serie);
+
+        //méthode qui extrait les éléments du formulaire de la requête
+        $serieForm->handleRequest($request);
 
 
+        if($serieForm->isSubmitted()){
 
-        //utilisation directement de l'entityManager
-        $entityManager->persist($serie);
-        $entityManager->flush();
+            //sauvegarde en BDD
+            $serieRepository->save($serie, true);
 
+            $this->addFlash("success", "Serie added !");
 
-        //affiche le contenu de la variable
-        //dump($serie);
-        //enregistrement en base de données
-        //$serieRepository->save($serie, true);
+            //redirige vers la page de détail de la série
+            return $this->redirectToRoute('serie_show', ['id'=>$serie->getId()] );
 
-        //dump($serie);
+        }
 
-        //$serie->setName("The last of us");
-       // $serieRepository->save($serie, true);
+        dump($serie);
 
-        //dump($serie);
-
-        $serieRepository->remove($serie, true);
-
-        //TODO créer un formulaire d'ajout de série
-
-        return $this->render('serie/add.html.twig');
+        return $this->render('serie/add.html.twig', [
+            'serieForm'=>$serieForm->createView()
+        ]);
     }
 
     #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'])]
