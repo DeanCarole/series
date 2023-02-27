@@ -7,6 +7,7 @@ use App\Form\SerieType;
 use App\Repository\SerieRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -66,6 +67,20 @@ class SerieController extends AbstractController
 
 
         if($serieForm->isSubmitted() && $serieForm->isValid()){
+
+            //upload photo
+            /**
+             * @var UploadedFile $file
+             */
+            $file = $serieForm->get('poster')->getData();
+
+            //création d'un noveau nom
+            $newFileName = $serie->getName() . "-" . uniqid() . "." . $file->guessExtension();
+            //copie du fichier dans le répertoire de sauvegarde en le renommant
+            $file->move('img/posters/series' , $newFileName);
+            //set le nouveau nom dans la série
+            $serie->setPoster($newFileName);
+
             //sauvegarde en BDD
             $serieRepository->save($serie, true);
 
@@ -98,6 +113,7 @@ class SerieController extends AbstractController
     #[Route('/remove/{id}', name: 'remove', requirements: ['id' => '\d+'])]
     public function remove(int $id, SerieRepository $serieRepository){
         $serie = $serieRepository->find($id);
+
         if($serie){
             //je le supprime
             $serieRepository->remove($serie, true);

@@ -3,7 +3,8 @@
 {% block body %}
     <h2>Serie's details</h2>
     <div class="flex_div">
-    <a class="link_button" href="{{ path ('serie_remove', {'id': serie.id}) }}">Delete</a>
+    <a class="link_button" href="{{ path ('serie_remove', {'id': serie.id}) }}"
+       onclick="return confirm('Are you sure to want to delete this serie : {{ serie.name }}')">Delete</a>
     </div>
 
     <div class="serie-details">
