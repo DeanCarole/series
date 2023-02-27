@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Serie;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,6 +17,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class SerieRepository extends ServiceEntityRepository
 {
+    const SERIE_LIMIT = 50;
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Serie::class);
@@ -40,33 +42,31 @@ class SerieRepository extends ServiceEntityRepository
     }
 
 
-    public function findBestSeries(){
+    public function findBestSeries(int $page){
 
-        //en DQL
-        //récupération des séries avec un vote > 8 et une popularit > 100 ordonné par popularité
 
-       // $dql = "SELECT s FROM App\Entity\Serie AS s
-        //        WHERE s.vote > 8
-        //        AND  s.popularity > 100
-       //         ORDER BY s.popularity DESC";
-        //transforme la chaîne de caractères $dql en objet
-       // $query = $this->getEntityManager()->createQuery($dql);
-        //ajoute une limite de résultat
-       // $query->setMaxResults(50);
+        //page 1 -> 0 à 49
+        // page 2 50 à 99
 
-       // return $query->getResult();
-
+        $offset = ($page - 1 ) * self::SERIE_LIMIT;
 
        //en querybuilder
         $qb = $this->createQueryBuilder('s');
-        $qb->addOrderBy('s.popularity', 'DESC')
-            ->andWhere('s.vote > 8')
-            ->andWhere('s.popularity > 100')
-            ->setMaxResults(50);
+        //jointure sur les attributs d'instance
+        $qb->leftJoin("s.seasons", "sea")
+            //récupération des colonnes de la jointure
+            ->addSelect("sea")
+            ->addOrderBy('s.popularity', 'DESC')
+           // ->andWhere('s.vote > 8')
+           // ->andWhere('s.popularity > 100')
+           ->setFirstResult($offset)
+            ->setMaxResults(self::SERIE_LIMIT);
 
         $query = $qb->getQuery();
+        //permet de gérer les offsets avec jointure
+        $paginator = new Paginator($query);
 
-        return $query->getResult();
+        return $paginator;
 
     }
 

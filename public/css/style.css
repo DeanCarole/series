@@ -137,8 +137,8 @@ textarea{
     background-color: lawngreen
 }
 
-.flash-error {
-    background-color: red
+.flash-warning {
+    background-color: orangered;
 }
 
 /************************** Module 7 Relations *****************************************/

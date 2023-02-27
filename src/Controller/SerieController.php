@@ -15,8 +15,8 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/serie', name: 'serie_')]
 class SerieController extends AbstractController
 {
-    #[Route('/list', name: 'list', methods: "GET")]
-    public function list(SerieRepository $serieRepository): Response
+    #[Route('/list/{page}', name: 'list', requirements: ['page' => '\d+'], methods: "GET")]
+    public function list(SerieRepository $serieRepository, int $page = 1): Response
     {
         //TODO récupérer la liste des séries en BDD
         //on récupère toutes les séries en passant par le repository
@@ -31,11 +31,23 @@ class SerieController extends AbstractController
         //méthode magique qui est créée dynamiquement en fonction des attributs de l'entité associée
         //$series = $serieRepository->findByStatus ("ended");
 
-        $series = $serieRepository->findBestSeries();
+        //nombre de séries dans ma table
+        $nbSerieMax = $serieRepository->count([]);
+
+        $maxPage = ceil($nbSerieMax / SerieRepository::SERIE_LIMIT);
+
+    if ($page >= 1 && $page <= $maxPage){
+        $series = $serieRepository->findBestSeries($page);
+    }else {
+        throw $this->createNotFoundException("Oops ! Page not found ! ");
+    }
+
 
         return $this->render('serie/list.html.twig', [
             //on envoie les données à la vue
-            'series' => $series
+            'series' => $series,
+            'currentPage'=> $page,
+            'maxPage'=> $maxPage
         ]);
     }
 
@@ -82,5 +94,18 @@ class SerieController extends AbstractController
         }
         //TODO récupération des infos de la série
         return $this->render('serie/show.html.twig', ['serie'=> $serie]);
+    }
+    #[Route('/remove/{id}', name: 'remove', requirements: ['id' => '\d+'])]
+    public function remove(int $id, SerieRepository $serieRepository){
+        $serie = $serieRepository->find($id);
+        if($serie){
+            //je le supprime
+            $serieRepository->remove($serie, true);
+            $this->addFlash("warning", "Serie deleted !");
+        }else{
+            throw $this->createNotFoundException("This serie can't be deleted ! ");
+        }
+        return $this->redirectToRoute('serie_list');
+
     }
 }
