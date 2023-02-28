@@ -7,14 +7,7 @@
 
 {# si je redéfinis le contenu, j'écrase le contenu présent dans la base #}
 {%  block body %}
-    <h1>Welcome to series !</h1>
-    {# désactiver la protection XSS #}
-    <div>{{ name | raw }}</div>
-
-    {# supprime complètement le code HTML #}
-    <div> {{  name | striptags }}</div>
-
-    <div>{{  name }}</div>
+    <h1>Welcome to series {{ name }} !</h1>
 
     <h2>Serie's detail</h2>
     <ul>

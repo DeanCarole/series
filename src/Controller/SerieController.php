@@ -53,8 +53,12 @@ class SerieController extends AbstractController
     }
 
     #[Route('/add', name: 'add')]
+    #[IsGranted("ROLE_USER")]
     public function add(SerieRepository $serieRepository, Request $request ): Response
     {
+        //renvoie une 403
+        //$this->createAccessDeniedException();
+
         $serie = new Serie();
 
        // $serie->setName("Sliders");
